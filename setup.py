@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='events',
-    version='20140325',
+    version='20140325.1',
     packages=['events'],
     url='https://github.com/ByteInternet/python-events',
     license='3-clause BSD',
