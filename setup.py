@@ -8,5 +8,6 @@ setup(
     license='3-clause BSD',
     author='Maarten van Schaik',
     author_email='maarten@byte.nl',
-    description='RabbitMQ event listener'
+    description='RabbitMQ event listener',
+    install_requires=['pika>=0.9.8']
 )
