@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import logging
-from consumer import EventConsumer
+
+from events.consumer import EventConsumer
 
 
 def handler(event):
