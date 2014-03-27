@@ -1,0 +1,16 @@
+Source: python-events
+Maintainer: Allard Hoeve <allard@byte.nl>
+Section: python
+Priority: optional
+Standards-Version: 3.9.4
+Build-Depends: debhelper (>= 9), python
+
+Package: python-events
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ ${python:Depends},
+ python-pika
+Description: Python module that facilitates listening to AMQP events
+ Python software and assorted utilities.
