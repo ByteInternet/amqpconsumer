@@ -30,22 +30,50 @@ class EventConsumer(object):
     >>>     c.stop()  # Gracefully disconnect from RabbitMQ
     """
 
-    def __init__(self, amqp_url, queue, handler):
+    # This class will string together all the async callbacks that are needed
+    # before consuming. The flow is this:
+    #
+    # connect -> on_connection_open ->
+    # open_channel -> on_channel_open ->
+    # setup_exchange -> on_exchange_declareok -> (these 2 are skipped if no exchange is provided)
+    # setup_queue -> on_queue_declareok ->
+    # on_bindok (skipped if no exchange is provided) ->
+    # start_consuming
+
+    def __init__(self, amqp_url, queue, handler, exchange=None, exchange_type=None, routing_key=None):
         """Create a new instance of the consumer class, passing in the URL
         of RabbitMQ, the queue to listen to, and a callable handler that
         handles the events.
 
+        The queue will be declared before consuming. If exchange, exchange_type,
+        and routing_key are provided, it will also declare the exchange and bind
+        the queue to it. Queue and exchange will be declared durable.
+
         :param str amqp_url: The AMQP url to connect with
         :param str queue: The queue to listen to
         :param function handler: The event handler that handles events
+        :param str exchange: Optional name of exchange to declare
+        :param str exchange_type: Optional type of exchange to declare
+        :param str routing_key: Optional routing key of binding to create between exchange and queue
         """
         self._connection = None
+        """:type: pika.SelectConnection"""
+
         self._channel = None
         self._consumer_tag = None
         self._closing = False
         self._handler = handler
         self._queue = queue
         self._url = amqp_url
+
+        if ((exchange or exchange_type or routing_key)
+                and not (exchange and exchange_type and routing_key)):
+            raise RuntimeError("Either provide all of exchange, exchange_type, and routing_key, "
+                               "or provide none of them to not declare and bind an exchange")
+
+        self._exchange = exchange
+        self._exchange_type = exchange_type
+        self._routing_key = routing_key
 
     def connect(self):
         """Connect to RabbitMQ, returning the connection handle.
@@ -123,8 +151,62 @@ class EventConsumer(object):
         self._channel = channel
         self.add_on_channel_close_callback()
 
-        # In the pika docs the exchange and queue are declared and bound
-        # here, but we assume these are already in place and start consuming
+        if self._exchange:
+            self.setup_exchange()
+        else:
+            self.setup_queue()
+
+    def setup_exchange(self):
+        """Declare the exchange
+
+        When completed, the on_exchange_declareok method will be invoked by pika.
+        """
+        logger.debug('Declaring exchange %s', self._exchange)
+        self._channel.exchange_declare(self.on_exchange_declareok,
+                                       self._exchange,
+                                       self._exchange_type,
+                                       durable=True)
+
+    def on_exchange_declareok(self, _):
+        """Invoked by pika when the exchange is declared.
+
+        :param pika.frame.Method _: Exchange.DeclareOk response frame
+        """
+        logger.debug("Exchange declared")
+        self.setup_queue()
+
+    def setup_queue(self):
+        """Declare the queue
+
+        When completed, the on_queue_declareok method will be invoked by pika.
+        """
+        logger.debug("Declaring queue %s" % self._queue)
+        self._channel.queue_declare(self.on_queue_declareok, self._queue, durable=True)
+
+    def on_queue_declareok(self, _):
+        """Invoked by pika when queue is declared
+
+        This method will start consuming or first bind the queue to the exchange
+        if an exchange is provided.
+
+        After binding, the on_bindok method will be invoked by pika.
+
+        :param pika.frame.Method _: The Queue.DeclareOk frame
+        """
+        logger.debug("Binding %s to %s with %s", self._exchange, self._queue, self._routing_key)
+        if self._exchange:
+            self._channel.queue_bind(self.on_bindok, self._queue, self._exchange, self._routing_key)
+        else:
+            self.start_consuming()
+
+    def on_bindok(self, _):
+        """Invoked by pika after the queue is bound
+
+        Starts consuming.
+
+        :param pika.frame.Method _: The Queue.BindOk frame
+        """
+        logger.debug("Queue bound")
         self.start_consuming()
 
     def add_on_channel_close_callback(self):
