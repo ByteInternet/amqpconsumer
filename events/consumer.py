@@ -150,7 +150,14 @@ class EventConsumer(object):
         logger.debug('Channel opened')
         self._channel = channel
         self.add_on_channel_close_callback()
+        self.setup_qos()
 
+    def setup_qos(self):
+        """Configure QoS to limit number of messages to prefetch """
+        self._channel.basic_qos(prefetch_count=1, callback=self.on_qos_set)
+
+    def on_qos_set(self, _):
+        """Will be invoked when the QoS is configured"""
         if self._exchange:
             self.setup_exchange()
         else:
