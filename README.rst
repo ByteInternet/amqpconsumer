@@ -10,7 +10,7 @@ AMQP event listener
 
     import logging
 
-    from amqpconsumer.consumer import EventConsumer
+    from amqpconsumer.events import EventConsumer
 
 
     def handler(event):
