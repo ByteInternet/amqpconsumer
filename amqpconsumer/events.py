@@ -295,7 +295,7 @@ class EventConsumer(object):
         """
         logger.debug('Received message # %s from %s: %s', basic_deliver.delivery_tag, properties.app_id, body)
         try:
-            decoded = json.loads(body)
+            decoded = json.loads(body.decode('-utf-8'))
         except ValueError:
             logger.warning('Discarding message containing invalid json: %s', body)
         else:
