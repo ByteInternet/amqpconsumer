@@ -44,3 +44,5 @@ fast and secure Magento hosting and scalable cluster hosting.
 Check out our `Github page <https://github.com/ByteInternet>`_ for more open source software or `our site <https://www.byte.nl>`_
 to learn about our products and technologies. Look interesting? Reach out about joining `the team <https://www.byte.nl/vacatures>`_.
 Or just drop by for a cup of excellent coffee if you're in town!
+
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/ByteInternet/python-events/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/ByteInternet/python-events/?branch=master)
