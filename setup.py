@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='amqpconsumer',
-    version='1.5',
+    version='1.6',
     description='AMQP event listener',
     url='https://github.com/ByteInternet/amqpconsumer',
     author='Byte B.V.',
