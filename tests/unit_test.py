@@ -153,7 +153,7 @@ def test_on_consumer_cancelled():
 def test_on_message():
     mock_handler = mock.Mock()
     consumer = get_consumer(handler=mock_handler)
-    body = '{"foo":"bar"}'
+    body = b'{"foo":"bar"}'
     mock_deliver = mock.Mock()
     mock_properties = mock.Mock()
     consumer.on_message('??', mock_deliver, mock_properties, body)
