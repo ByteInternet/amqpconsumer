@@ -1,11 +1,12 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import logging
 
 from amqpconsumer.events import EventConsumer
 
 
 def handler(event):
-    print "Got event:", event
+    print("Got event:", event)
 
 
 def main():
