@@ -7,33 +7,38 @@ A Python module to facilitate listening for and acting on AMQP events.
 Usage
 -----
 
-Example:
+See `example_listener.py <https://github.com/ByteInternet/amqpconsumer/blob/master/example_listener.py>`_ for a code snippet.
 
-.. code-block:: python
+Development
+-----------
 
-    import logging
+We recommend setting up a virtual environment for the project. All the following commands assume you've activated the virtual environment.
 
-    from amqpconsumer.events import EventConsumer
+Make sure both module and development dependencies are installed:
 
+.. code-block:: bash
 
-    def handler(event):
-        print "Got event:", event
+    pip install -e . -r requirements-dev.txt
 
+Run tests:
 
-    def main():
-        logging.basicConfig(level=logging.INFO)
-        consumer = EventConsumer('amqp://guest:guest@localhost:5672/%2f',
-                                 'testqueue',
-                                 handler)
-        try:
-            consumer.run()
-        except KeyboardInterrupt:
-            consumer.stop()
+.. code-block:: bash
 
+    pytest
 
-    if __name__ == '__main__':
-        main()
+If you want to generate code coverage statistics:
 
+.. code-block:: bash
+
+    pytest --cov amqpconsumer --cov-report html
+
+Then open `htmlcov/index.html` in your favorite web browser.
+
+Run linting and static analysis:
+
+.. code-block:: bash
+
+    prospector
 
 =====
 About
