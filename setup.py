@@ -5,6 +5,7 @@ setup(
     name='amqpconsumer',
     version='1.7',
     description='AMQP event listener',
+    long_description=open('README.rst').read(),
     url='https://github.com/ByteInternet/amqpconsumer',
     author='Byte B.V.',
     author_email='tech@byte.nl',
