@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='amqpconsumer',
-    version='1.7',
+    version='1.7.1',
     description='AMQP event listener',
     url='https://github.com/ByteInternet/amqpconsumer',
     author='Byte B.V.',
@@ -25,5 +25,5 @@ setup(
     ],
     keywords='amqp events consumer listener rabbitmq',
     packages=['amqpconsumer'],
-    install_requires=['pika>=0.9.8']
+    install_requires=['pika>=1.0.0']
 )
