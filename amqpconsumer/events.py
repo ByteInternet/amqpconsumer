@@ -40,7 +40,7 @@ class EventConsumer(object):
     # on_bindok (skipped if no exchange is provided) ->
     # start_consuming
 
-    def __init__(self, amqp_url, queue, handler, exchange=None, exchange_type=None, routing_key=None):
+    def __init__(self, amqp_url, queue, handler, exchange=None, exchange_type=None, routing_key=None):  # pylint: disable=too-many-arguments
         """Create a new instance of the consumer class, passing in the URL
         of RabbitMQ, the queue to listen to, and a callable handler that
         handles the events.
@@ -186,7 +186,7 @@ class EventConsumer(object):
 
         When completed, the on_queue_declareok method will be invoked by pika.
         """
-        logger.debug("Declaring queue %s" % self._queue)
+        logger.debug('Declaring queue %s', self._queue)
         self._channel.queue_declare(self.on_queue_declareok, self._queue, durable=True)
 
     def on_queue_declareok(self, _):
