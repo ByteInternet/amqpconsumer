@@ -85,8 +85,7 @@ class EventConsumer(object):
         """
         logger.debug('Connecting to %s', self._url)
         return pika.SelectConnection(pika.URLParameters(self._url),
-                                     self.on_connection_open,
-                                     stop_ioloop_on_close=False)
+                                     self.on_connection_open)
 
     def on_connection_open(self, _):
         """Called by pika once the connection to RabbitMQ has been established.
