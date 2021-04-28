@@ -187,7 +187,7 @@ class EventConsumer(object):
         When completed, the on_queue_declareok method will be invoked by pika.
         """
         logger.debug("Declaring queue %s" % self._queue)
-        self._channel.queue_declare(self.on_queue_declareok, self._queue, durable=True)
+        self._channel.queue_declare(queue=self._queue, callback=self.on_queue_declareok, durable=True)
 
     def on_queue_declareok(self, _):
         """Invoked by pika when queue is declared
