@@ -106,22 +106,21 @@ class EventConsumer(object):
         logger.debug('Adding connection close callback')
         self._connection.add_on_close_callback(self.on_connection_closed)
 
-    def on_connection_closed(self, _, reply_code, reply_text):
+    def on_connection_closed(self, _, error):
         """Called by pika when the connection to RabbitMQ is closed
         unexpectedly.
 
         Since it is unexpected, we will reconnect to RabbitMQ if it disconnects.
 
         :param pika.connection.Connection _: The closed connection object
-        :param int reply_code: The server provided reply_code if given
-        :param str reply_text: The server provided reply_text if given
+        :param Exception | None error: The Exception containing the reason the connection was closed
         """
         self._channel = None
         if self._closing:
             self._connection.ioloop.stop()
         else:
-            logger.warning('Connection closed, reopening in 5 seconds: (%s) %s', reply_code, reply_text)
-            self._connection.add_timeout(5, self.reconnect)
+            logger.warning('Connection closed, reopening in 5 seconds: {}'.format(error))
+            self._connection.ioloop.call_later(5, self.reconnect)
 
     def reconnect(self):
         """Will be invoked by the IOLoop timer if the connection is closed.
@@ -187,7 +186,7 @@ class EventConsumer(object):
         When completed, the on_queue_declareok method will be invoked by pika.
         """
         logger.debug("Declaring queue %s" % self._queue)
-        self._channel.queue_declare(self.on_queue_declareok, self._queue, durable=True)
+        self._channel.queue_declare(queue=self._queue, callback=self.on_queue_declareok, durable=True)
 
     def on_queue_declareok(self, _):
         """Invoked by pika when queue is declared
@@ -222,7 +221,7 @@ class EventConsumer(object):
         logger.debug('Adding channel close callback')
         self._channel.add_on_close_callback(self.on_channel_closed)
 
-    def on_channel_closed(self, channel, reply_code, reply_text):
+    def on_channel_closed(self, channel, closing_reason):
         """Called by pika when RabbitMQ unexpectedly closes the channel.
 
         Channels are usually closed if you attempt to do something that
@@ -231,11 +230,11 @@ class EventConsumer(object):
         shutdown the object.
 
         :param pika.channel.Channel: The closed channel
-        :param int reply_code: The numeric reason the channel was closed
-        :param str reply_text: The text reason the channel was closed
+        :param Exception | None closing reason: The Exception containing the reason the connection was closed
         """
-        logger.warning('Channel %d was closed: (%s) %s', channel, reply_code, reply_text)
-        self._connection.close()
+        logger.warning('Channel {} was closed: {}'.format(channel, closing_reason))
+        if not self._connection.is_closing and not self._connection.is_closed:
+            self._connection.close()
 
     def start_consuming(self):
         """Sets up the consumer.
@@ -250,8 +249,7 @@ class EventConsumer(object):
         when a message is fully received.
         """
         self.add_on_cancel_callback()
-        self._consumer_tag = self._channel.basic_consume(self.on_message,
-                                                         self._queue)
+        self._consumer_tag = self._channel.basic_consume(self._queue, self.on_message)
         logger.info('Listening')
 
     def add_on_cancel_callback(self):
