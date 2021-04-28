@@ -249,8 +249,7 @@ class EventConsumer(object):
         when a message is fully received.
         """
         self.add_on_cancel_callback()
-        self._consumer_tag = self._channel.basic_consume(self.on_message,
-                                                         self._queue)
+        self._consumer_tag = self._channel.basic_consume(self._queue, self.on_message)
         logger.info('Listening')
 
     def add_on_cancel_callback(self):
