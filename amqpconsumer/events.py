@@ -233,7 +233,8 @@ class EventConsumer(object):
         :param Exception | None closing reason: The Exception containing the reason the connection was closed
         """
         logger.warning('Channel {} was closed: {}'.format(channel, closing_reason))
-        self._connection.close()
+        if not self._connection.is_closing and not self._connection.is_closed:
+            self._connection.close()
 
     def start_consuming(self):
         """Sets up the consumer.
