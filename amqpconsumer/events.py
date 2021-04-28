@@ -120,7 +120,7 @@ class EventConsumer(object):
             self._connection.ioloop.stop()
         else:
             logger.warning('Connection closed, reopening in 5 seconds: {}'.format(error))
-            self._connection.add_timeout(5, self.reconnect)
+            self._connection.ioloop.call_later(5, self.reconnect)
 
     def reconnect(self):
         """Will be invoked by the IOLoop timer if the connection is closed.
