@@ -167,9 +167,9 @@ class EventConsumer(object):
         When completed, the on_exchange_declareok method will be invoked by pika.
         """
         logger.debug('Declaring exchange %s', self._exchange)
-        self._channel.exchange_declare(self.on_exchange_declareok,
-                                       self._exchange,
-                                       self._exchange_type,
+        self._channel.exchange_declare(exchange=self._exchange,
+                                       exchange_type=self._exchange_type,
+                                       callback=self.on_exchange_declareok,
                                        durable=True)
 
     def on_exchange_declareok(self, _):
