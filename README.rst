@@ -17,7 +17,7 @@ Example:
 
 
     def handler(event):
-        print "Got event:", event
+        print("Got event:", event)
 
 
     def main():
@@ -35,6 +35,22 @@ Example:
         main()
 
 
+Tracing
+-------
+For every consumed message the consumer extracts OpenTelemetry trace context from the
+AMQP message headers and wraps the handler call in a consumer span, continuing the
+publisher's trace when the message carries one (messages without trace headers simply
+start a trace of their own). This only depends on ``opentelemetry-api``, for applications
+without a configured OpenTelemetry backend all tracing calls are no-ops and the behaviour
+is unchanged. To get the spans into your tracing backend, configure an OpenTelemetry SDK
+in your application (for example by enabling the Sentry SDK's OpenTelemetry support).
+
+
+Running tests
+-------------
+Install `uv <https://docs.astral.sh/uv/>`_ and run ``uv run pytest tests``.
+
+
 =====
 About
 =====
@@ -44,5 +60,3 @@ fast and secure Magento hosting and scalable cluster hosting.
 Check out our `Github page <https://github.com/ByteInternet>`_ for more open source software or `our site <https://www.byte.nl>`_
 to learn about our products and technologies. Look interesting? Reach out about joining `the team <https://www.byte.nl/vacatures>`_.
 Or just drop by for a cup of excellent coffee if you're in town!
-
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/ByteInternet/python-events/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/ByteInternet/python-events/?branch=master)
