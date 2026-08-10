@@ -2,7 +2,11 @@ import logging
 import pika
 import json
 
+from opentelemetry import propagate, trace
+
 logger = logging.getLogger(__name__)
+
+tracer = trace.get_tracer('amqpconsumer')
 
 
 class EventConsumer(object):
@@ -297,7 +301,21 @@ class EventConsumer(object):
         except ValueError:
             logger.warning('Discarding message containing invalid json: %s', body)
         else:
-            self._handler(decoded)
+            event_type = decoded.get('type') if isinstance(decoded, dict) else None
+            context = propagate.extract(properties.headers or {})
+            with tracer.start_as_current_span(
+                    'process {}'.format(event_type or self._queue),
+                    kind=trace.SpanKind.CONSUMER,
+                    context=context) as span:
+                span.set_attribute('messaging.system', 'rabbitmq')
+                span.set_attribute('messaging.operation.name', 'process')
+                span.set_attribute('messaging.operation.type', 'process')
+                span.set_attribute('messaging.destination.name', self._queue)
+                if basic_deliver.routing_key:
+                    span.set_attribute('messaging.rabbitmq.destination.routing_key', basic_deliver.routing_key)
+                if event_type:
+                    span.set_attribute('event.type', str(event_type))
+                self._handler(decoded)
 
         self.acknowledge_message(basic_deliver.delivery_tag)
 
