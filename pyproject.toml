@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "amqpconsumer"
-version = "1.8.0"
+version = "1.8.1"
 description = "AMQP event listener"
 readme = "README.rst"
 license = "BSD-3-Clause"
